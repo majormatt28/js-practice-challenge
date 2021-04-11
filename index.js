@@ -132,6 +132,7 @@ animalLikes.addEventListener('click', (event) => {
     else if (event.target.className === 'like-button') {
         const likes = document.querySelector('p.likes')
         const recentLikes = parseInt(likes.textContent) 
+        const sightingDesc = event.target.closest("[data-id]")
 
         fetch (`http://localhost:3000/animalSightings/${sightingDesc.dataset.id}`, {
             method: 'PATCH',
@@ -155,4 +156,27 @@ animalLikes.addEventListener('click', (event) => {
         else if (sightingDesc.style.display === 'block') {
             sightingDesc.style.display = 'none'
     }   }
+})
+
+animalLikes.addEventListener('submit', (event) => {
+    if (event.target.className === 'update-form') {
+        event.preventDefault()
+
+        const descInput = event.target[0].value
+        const closestLi = event.target.closest('li')
+        
+        fetch (`http://localhost:3000/animalSightings/${closestLi.dataset.id}`, {
+            method: 'PATCH',
+            header: {
+                'Content-type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ description: descInput })
+        })
+            .then(response => response.json())
+            .then(data => {
+                const descPTag = closestLi.querySelector('p')
+                descPTag.textContent = data.description
+            })
+    }
 })
