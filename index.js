@@ -1,4 +1,3 @@
-// write code here
 function travelerObj () {
     fetch ('http://localhost:3000/travelers/1')
         .then(response => response.json())
@@ -29,9 +28,37 @@ function animalSightings() {
         .then(response => response.json())
         .then(animalSightingArr => {
 
-            animalSightingArr.forEach(animalSighting => {
+            animalSightingArr.forEach(animalSighting => renderAnimalSighting(animalSighting))
+            // {
                 
-                const updateLi = document.createElement('li')
+            //     const updateLi = document.createElement('li')
+                
+            //     updateLi.dataset.id = animalSighting.id
+    
+            //     updateLi.innerHTML = `
+            //     <p>${animalSighting.description}</p>
+            //     <img src='${animalSighting.photo}' alt='${animalSighting.species}'/>
+            //     <a href='${animalSighting.link}' target='_blank'>Here's a video about the ${animalSighting.species} species!</a>
+            //     <p class='likes-display'>${animalSighting.likes} Likes</p>
+            //     <button class="like-button" type="button">Like</button>
+            //     <button class="delete-button" type="button">Delete</button>
+            //     <button class="toggle-update-form-button" type="button">Toggle Update Form</button>
+            //     <form class="update-form" style="display: none;">
+            //       <input type="text" value="${animalSighting.description}"/>
+            //       <input type="submit" value="Update description">
+            //     </form>`
+    
+            //   const animalSightingsUl = document.querySelector('ul#animals')
+    
+            //   animalSightingsUl.append(updateLi)  
+            // })
+        })
+
+}
+animalSightings()
+
+function renderAnimalSighting(animalSighting) {
+    const updateLi = document.createElement('li')
                 
                 updateLi.dataset.id = animalSighting.id
     
@@ -46,17 +73,12 @@ function animalSightings() {
                 <form class="update-form" style="display: none;">
                   <input type="text" value="${animalSighting.description}"/>
                   <input type="submit" value="Update description">
-                  </form>`
+                </form>`
     
               const animalSightingsUl = document.querySelector('ul#animals')
     
-              animalSightingsUl.append(updateLi)  
-            })
-        })
-
+              animalSightingsUl.append(updateLi)
 }
-animalSightings()
-
 
 const form = document.querySelector('form#new-animal-sighting-form')
 
@@ -83,7 +105,7 @@ form.addEventListener('submit', (event) => {
     })
         .then(response => response.json())
         .then(newSightingPost => {
-            animalSightings(newSightingPost)
+            renderAnimalSighting(newSightingPost)
         })
     form.reset()
 })
@@ -117,24 +139,28 @@ const animalLikes = document.querySelector('ul#animals')
 
 animalLikes.addEventListener('click', (event) => {
     if (event.target.className === 'delete-button') {
-        const sightingDesc = event.target.closest("[data-id]")
+        
+        const sighting = event.target.closest("[data-id]")
         
 
-        fetch (`http://localhost:3000/animalSightings/${sightingDesc.dataset.id}`,{
+        fetch (`http://localhost:3000/animalSightings/${sighting.dataset.id}`,{
             method: 'DELETE'
         })
             .then(response => response.json())
             .then(data => {
-                sightingDesc.remove()
+                sighting.remove()
             })
         
     }
     else if (event.target.className === 'like-button') {
-        const likes = document.querySelector('p.likes')
+        
+        const likes = document.querySelector('.likes-display')
+        const sighting = event.target.closest("[data-id]")
         const recentLikes = parseInt(likes.textContent) 
-        const sightingDesc = event.target.closest("[data-id]")
+        console.log(recentLikes)
+        
 
-        fetch (`http://localhost:3000/animalSightings/${sightingDesc.dataset.id}`, {
+        fetch (`http://localhost:3000/animalSightings/${sighting.dataset.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -161,20 +187,24 @@ animalLikes.addEventListener('click', (event) => {
 animalLikes.addEventListener('submit', (event) => {
     if (event.target.className === 'update-form') {
         event.preventDefault()
-
+        // console.log(event.target)
         const descInput = event.target[0].value
         const closestLi = event.target.closest('li')
-        
+
+        // const descPTag = closestLi.querySelector('p')
+        // descPTag.textContent = descInput
+        // console.log(closestLi)
         fetch (`http://localhost:3000/animalSightings/${closestLi.dataset.id}`, {
             method: 'PATCH',
-            header: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json'
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
             },
             body: JSON.stringify({ description: descInput })
         })
             .then(response => response.json())
             .then(data => {
+                console.log(data.description)
                 const descPTag = closestLi.querySelector('p')
                 descPTag.textContent = data.description
             })
